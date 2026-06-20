@@ -13,6 +13,17 @@ import (
 
 )
 
+func IsDirectory(path string) (bool, error) {
+	// Get file details; returns an error if the path does not exist
+	fileInfo, err := os.Stat(path)
+	if err != nil {
+		return false, err 
+	}
+
+	// Return true if the path points to a directory
+	return fileInfo.IsDir(), nil
+}
+
 // ExtractTarGz securely extracts a .tar.gz file, mitigating Zip Slip vulnerabilities.
 func ExtractTarGz(archivePath, targetDir string) (error,string) {
 	println("ExtractTarGz::targetDir=" + targetDir)
@@ -97,7 +108,8 @@ func GetFiles(root string,ext string)([] string) {
 
 func ZipFolder(folder string) string {
 	foldername := filepath.Base(folder)
-	filename := filepath.Join(folder,foldername + ".zip")
+	parentPath := filepath.Dir(folder)
+	filename := filepath.Join(parentPath,foldername + ".zip")
     file, err := os.Create(filename)
     if err != nil {
         panic(err)
@@ -108,7 +120,7 @@ func ZipFolder(folder string) string {
     defer zipFile.Close()
 
     walker := func(path string, info os.FileInfo, err error) error {
-        fmt.Printf("Crawling: %#v\n", path)
+        fmt.Printf("ZipFolder::Crawling: %#v\n", path)
         if err != nil {
             return err
         }
@@ -126,7 +138,7 @@ func ZipFolder(folder string) string {
         // absolute paths, but ensure your real-world code 
         // transforms path into a zip-root relative path.
 		subpath := path[len(folder) + 1:]
-        fmt.Printf("Crawling: subpath %#v\n", subpath)
+        fmt.Printf("ZipFolder::Crawling: sub-path %#v\n", subpath)
         f, err := zipFile.Create(subpath)
         if err != nil {
             return err

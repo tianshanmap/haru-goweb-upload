@@ -95,11 +95,16 @@ func UnzipHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(data)
 }
 
-func ZipFolderHandler(w http.ResponseWriter, r *http.Request) {
+func Download(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
 	filename := queryParams.Get("name")
-	filePath := utils.ZipFolder(filename);	
-	downloadName := filepath.Base(filePath)
+	isDir,_ := utils.IsDirectory(filename)
+	downloadName := filepath.Base(filename)
+	filePath := filename
+	if isDir {
+		filePath = utils.ZipFolder(filename);	
+		downloadName = filepath.Base(filePath)
+	}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, downloadName))
 	w.Header().Set("Content-Type", "application/zip")
