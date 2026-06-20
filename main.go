@@ -11,6 +11,7 @@ func main() {
 	// Mount the router pattern to our handler logic
 	http.HandleFunc("/goweb/filesystem/upload_chunk", web.UploadFileHandler)
 	http.HandleFunc("/goweb/filesystem/unzip", web.UnzipHandler)
+	http.HandleFunc("/goweb/filesystem/download", web.ZipFolderHandler)
 
 	fmt.Println("Server starting on port :8081...")
 	if err := http.ListenAndServe(":8081", nil); err != nil {
