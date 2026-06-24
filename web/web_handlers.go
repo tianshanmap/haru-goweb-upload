@@ -99,14 +99,17 @@ func Download(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
 	filename := queryParams.Get("name")
 	isDir,_ := utils.IsDirectory(filename)
-	downloadName := filepath.Base(filename)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	filePath := filename
 	if isDir {
-		filePath = utils.ZipFolder(filename);	
-		downloadName = filepath.Base(filePath)
+		filePath = utils.ZipFolder(filename)	
+		downloadName := filepath.Base(filePath)
+		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, downloadName))
+		w.Header().Set("Content-Type", "application/zip")
+	} else {
+		downloadName := filepath.Base(filename)
+		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, downloadName))
+		w.Header().Set("Content-Type", "application/octet-stream")
 	}
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, downloadName))
-	w.Header().Set("Content-Type", "application/zip")
 	http.ServeFile(w, r, filePath)	
 }
