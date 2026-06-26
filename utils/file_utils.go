@@ -107,6 +107,7 @@ func GetFiles(root string,ext string)([] string) {
 }
 
 func ZipFolder(folder string) string {
+	fmt.Println("ZipFolder-start-" + folder);	
 	foldername := filepath.Base(folder)
 	parentPath := filepath.Dir(folder)
 	filename := filepath.Join(parentPath,foldername + ".zip")
@@ -120,7 +121,6 @@ func ZipFolder(folder string) string {
     defer zipFile.Close()
 
     walker := func(path string, info os.FileInfo, err error) error {
-        fmt.Printf("ZipFolder::Crawling: %#v\n", path)
         if err != nil {
             return err
         }
@@ -138,7 +138,6 @@ func ZipFolder(folder string) string {
         // absolute paths, but ensure your real-world code 
         // transforms path into a zip-root relative path.
 		subpath := path[len(folder) + 1:]
-        fmt.Printf("ZipFolder::Crawling: sub-path %#v\n", subpath)
         f, err := zipFile.Create(subpath)
         if err != nil {
             return err
@@ -155,5 +154,6 @@ func ZipFolder(folder string) string {
     if err != nil {
         panic(err)
     }
+	fmt.Println("ZipFolder-end-" + folder + ",filename=" + filename);	
 	return filename 
 }

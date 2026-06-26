@@ -113,3 +113,39 @@ func Download(w http.ResponseWriter, r *http.Request) {
 	}
 	http.ServeFile(w, r, filePath)	
 }
+
+func ChunkDownloadHandler(w http.ResponseWriter, r *http.Request) {
+    fmt.Printf("ChunkDownloadHandler-started\n")
+	queryParams := r.URL.Query()
+	filename := queryParams.Get("name")
+	isDir,_ := utils.IsDirectory(filename)
+	filePath := filename
+	if isDir {
+		filePath = utils.ZipFolder(filename)	
+	}
+
+	// Open the file
+	file, err := os.Open(filePath)
+	if err != nil {
+		http.Error(w, "File not found", http.StatusNotFound)
+		return
+	}
+	defer file.Close()
+
+	// Get file information for size and modification time
+	fileInfo, err := file.Stat()
+	if err != nil {
+		http.Error(w, "Could not get file info", http.StatusInternalServerError)
+		return
+	}
+
+	// ServeContent handles HTTP Range requests and chunking automatically
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	//allow client to see all the headers
+	w.Header().Set("Access-Control-Expose-Headers", "*")
+	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filepath.Base(filePath)))
+	w.Header().Set("Content-Type", "application/octet-stream")
+	w.Header().Set("filename", filepath.Base(filePath))
+	
+	http.ServeContent(w, r, fileInfo.Name(), fileInfo.ModTime(), file)
+}
