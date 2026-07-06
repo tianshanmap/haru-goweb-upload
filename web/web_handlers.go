@@ -20,6 +20,11 @@ type UnzipResponse struct {
 	Files []string `json:"files"`
 	Name string `json:"name"`
 }
+
+func removeExtension(filename string) string {
+	return strings.TrimSuffix(filename, filepath.Ext(filename))
+}
+
 func UploadFileHandler(w http.ResponseWriter, r *http.Request) {
 	println("uploadFileHandler-started,r.Method=" + r.Method)
 	// 1. Enforce POST request method
@@ -75,9 +80,12 @@ func UnzipHandler(w http.ResponseWriter, r *http.Request) {
 	// 1. Get a single/first parameter value
 	// Example URL: /search?search_term=golang
 	filename := queryParams.Get("filename")
-	target := queryParams.Get("target")
-	dstPath := filepath.Join(target, filepath.Base(filename))
-	println("UnzipHandler::dstPath=" + dstPath)
+	parentName := removeExtension(filepath.Base(filename)) // Returns: "myapp"
+
+	target_from_web := queryParams.Get("target")
+	target := filepath.Join(target_from_web, parentName);
+	// dstPath := filepath.Join(target, parentName,filepath.Base(filename))
+	// println("UnzipHandler::dstPath=" + dstPath)
 	if strings.HasSuffix(filename, ".zip"){
 		utils.ExtractZip(filename,target)
 	} else {
@@ -93,7 +101,7 @@ func UnzipHandler(w http.ResponseWriter, r *http.Request) {
 	// files := utils.GetFiles(target,".jpeg")
 	data := UnzipResponse {
 		Status: "success",
-		TargetPath:  target,
+		TargetPath:  target_from_web,
 		Files: []string{},
 		Name: "",
 	}
