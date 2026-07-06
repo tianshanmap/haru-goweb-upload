@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"path/filepath"
 	"encoding/json"
 	"github.com/tianshanmap/haru-goweb-upload/utils"
@@ -63,6 +64,7 @@ func UploadFileHandler(w http.ResponseWriter, r *http.Request) {
 	outfile.Write(fileBytes)
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Expose-Headers", "*")
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "Successfully uploaded file: %s\n", handler.Filename)
 }
@@ -76,20 +78,24 @@ func UnzipHandler(w http.ResponseWriter, r *http.Request) {
 	target := queryParams.Get("target")
 	dstPath := filepath.Join(target, filepath.Base(filename))
 	println("UnzipHandler::dstPath=" + dstPath)
-	err,topPath := utils.ExtractTarGz(dstPath, target)
-	if err != nil {
-		http.Error(w, "Failed to read file", http.StatusInternalServerError)
-		return
+	if strings.HasSuffix(filename, ".zip"){
+		utils.ExtractZip(filename,target)
+	} else {
+		err,_ := utils.ExtractTarGz(filename, target)
+		if err != nil {
+			http.Error(w, "Failed to read file", http.StatusInternalServerError)
+			return
+		}
 	}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	files := utils.GetFiles(topPath,".jpeg")
+	// files := utils.GetFiles(target,".jpeg")
 	data := UnzipResponse {
 		Status: "success",
-		TargetPath:  topPath,
-		Files: files,
-		Name: files[0],
+		TargetPath:  target,
+		Files: []string{},
+		Name: "",
 	}
 	// Encode and stream data directly to the client
 	json.NewEncoder(w).Encode(data)
