@@ -163,6 +163,7 @@ func ZipFolder(folder string) string {
 }
 
 func ExtractZip(archivePath, dst string) {
+	Log.Info("ExtractZip-started,archivePath=%s,dst=%s",archivePath,dst)
     archive, err := zip.OpenReader(archivePath)
     if err != nil {
         panic(err)

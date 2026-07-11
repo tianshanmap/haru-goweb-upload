@@ -1,0 +1,28 @@
+<logging>
+  <filter enabled="true">
+    <tag>stdout</tag>
+    <type>console</type>
+    <!-- level options: FINEST, FINE, DEBUG, TRACE, INFO, WARNING, ERROR, CRITICAL -->
+    <level>DEBUG</level>
+  </filter>
+
+  <filter enabled="true">
+    <tag>file</tag>
+    <type>file</type>
+    <level>INFO</level>
+    <property name="filename">app.log</property>
+    <!-- %T: Time (15:04:05 MST) -->
+    <!-- %D: Date (2006/01/02) -->
+    <!-- %C: Context (package.Function) -->
+    <!-- %L: Line number -->
+    <!-- %M: Message -->
+    <property name="format">[%D %T] [%L] (%C) %M</property>
+  </filter>
+
+  <filter enabled="false">
+    <tag>xmlfile</tag>
+    <type>xml</type>
+    <level>TRACE</level>
+    <property name="filename">trace.xml</property>
+  </filter>
+</logging>

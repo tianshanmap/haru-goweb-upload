@@ -86,6 +86,7 @@ func UnzipHandler(w http.ResponseWriter, r *http.Request) {
 	target := filepath.Join(target_from_web, parentName);
 	// dstPath := filepath.Join(target, parentName,filepath.Base(filename))
 	// println("UnzipHandler::dstPath=" + dstPath)
+	utils.Log.Info("UnzipHandler - filename=%s,target_from_web=%s",filename,target_from_web)	
 	if strings.HasSuffix(filename, ".zip"){
 		utils.ExtractZip(filename,target)
 	} else {
